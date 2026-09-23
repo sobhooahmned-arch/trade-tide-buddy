@@ -275,3 +275,91 @@ function UserRow({
     </li>
   );
 }
+
+function PaySettingsCard({ onSaved }: { onSaved: () => void }) {
+  const [form, setForm] = useState<PaySettings>(getPaySettings());
+
+  useEffect(() => {
+    setForm(getPaySettings());
+  }, []);
+
+  function setNumber(i: number, value: string) {
+    setForm((f) => ({
+      ...f,
+      depositNumbers: f.depositNumbers.map((n, idx) => (idx === i ? value : n)),
+    }));
+  }
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-4">
+      <h2 className="text-lg font-bold">بيانات التحويل</h2>
+      <p className="mt-1 text-xs text-muted-foreground">
+        غيّر اسم طريقة التحويل وأرقام الإيداع ورقم الضريبة، وهتظهر للمستخدمين فوراً.
+      </p>
+
+      <label className="mt-4 block text-xs text-muted-foreground">اسم طريقة التحويل</label>
+      <input
+        value={form.methodName}
+        onChange={(e) => setForm((f) => ({ ...f, methodName: e.target.value }))}
+        placeholder="أورنج كاش"
+        className="mt-1 w-full rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm outline-none focus:border-primary"
+      />
+
+      <p className="mt-4 text-xs text-muted-foreground">أرقام استلام الإيداع</p>
+      <div className="mt-1 space-y-2">
+        {form.depositNumbers.map((num, i) => (
+          <div key={i} className="flex gap-2">
+            <input
+              value={num}
+              onChange={(e) => setNumber(i, e.target.value.replace(/[^\d+]/g, ""))}
+              inputMode="tel"
+              dir="ltr"
+              placeholder="01xxxxxxxxx"
+              className="flex-1 rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm outline-none focus:border-primary"
+            />
+            {form.depositNumbers.length > 1 && (
+              <button
+                onClick={() =>
+                  setForm((f) => ({
+                    ...f,
+                    depositNumbers: f.depositNumbers.filter((_, idx) => idx !== i),
+                  }))
+                }
+                className="rounded-xl border border-border px-3 py-2 text-xs"
+              >
+                حذف
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={() => setForm((f) => ({ ...f, depositNumbers: [...f.depositNumbers, ""] }))}
+        className="mt-2 rounded-xl border border-border px-3 py-2 text-xs"
+      >
+        + إضافة رقم
+      </button>
+
+      <label className="mt-4 block text-xs text-muted-foreground">رقم استلام الضريبة</label>
+      <input
+        value={form.taxNumber}
+        onChange={(e) => setForm((f) => ({ ...f, taxNumber: e.target.value.replace(/[^\d+]/g, "") }))}
+        inputMode="tel"
+        dir="ltr"
+        placeholder="01xxxxxxxxx"
+        className="mt-1 w-full rounded-xl border border-input bg-background/60 px-3 py-2.5 text-sm outline-none focus:border-primary"
+      />
+
+      <button
+        onClick={() => {
+          savePaySettings(form);
+          setForm(getPaySettings());
+          onSaved();
+        }}
+        className="mt-4 w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground"
+      >
+        حفظ بيانات التحويل
+      </button>
+    </section>
+  );
+}
