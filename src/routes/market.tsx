@@ -28,9 +28,9 @@ import {
   remainingMs,
   subscribe,
   submitTaxProof,
-  TAX_PHONE,
   type Subscription,
 } from "@/lib/subscription";
+import { getPaySettings } from "@/lib/settings";
 
 type PackageGroup = "small" | "large";
 
@@ -523,6 +523,7 @@ function MoneyModal({
   const [method, setMethod] = useState<string | null>(null);
   const [receiveNumber, setReceiveNumber] = useState("");
   const amount = Number(raw);
+  const paySettings = getPaySettings();
 
   // الضريبة تظهر فقط للمشتركين في باقة ولم يدفعوا ضريبتها
   const needsTax = Boolean(subscription) && !subscription?.taxPaid;
@@ -549,7 +550,7 @@ function MoneyModal({
               1- حوّل الضريبة المطلوبة على الرقم ده لاستلام الأرباح مباشرة
             </p>
             <p className="mt-1 text-lg font-black tabular-nums" dir="ltr">
-              {TAX_PHONE}
+              {paySettings.taxNumber}
             </p>
           </div>
 
@@ -639,7 +640,7 @@ function MoneyModal({
         <h3 className="text-lg font-bold">{kind === "deposit" ? "إيداع رصيد" : `سحب عن طريق ${method}`}</h3>
         {kind === "deposit" ? (
           <p className="mt-1 text-sm text-muted-foreground">
-            هنتنقل لصفحة فيها أرقام أورنج كاش للتحويل، هتضيف فيها إثبات التحويل وتكتب المبلغ.
+            هنتنقل لصفحة فيها أرقام {paySettings.methodName} للتحويل، هتضيف فيها إثبات التحويل وتكتب المبلغ.
           </p>
         ) : (
           <>
