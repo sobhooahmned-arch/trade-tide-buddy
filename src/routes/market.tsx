@@ -5,15 +5,12 @@ import {
   Clock3,
   Gem,
   Landmark,
-  Smartphone,
-  ShieldCheck,
   WalletCards,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { clearStoredUser, getStoredUser, type StoredUser } from "@/lib/auth";
 import { createStocks, fmt, tick, toPath, type Stock } from "@/lib/market";
 import {
-  addRequest,
   getBalance,
   updateBalance,
   userRequests,
@@ -23,14 +20,11 @@ import {
   currentProfit,
   formatRemaining,
   getSubscription,
-  PACKAGE_TAX,
   progressOf,
   remainingMs,
   subscribe,
-  submitTaxProof,
   type Subscription,
 } from "@/lib/subscription";
-import { getPaySettings } from "@/lib/settings";
 
 type PackageGroup = "small" | "large";
 
@@ -466,211 +460,3 @@ function StockRow({ stock }: { stock: Stock }) {
   );
 }
 
-const WITHDRAW_METHODS = ["اتصالات كاش", "أورانج كاش", "وي كاش", "انستا باي"] as const;
-
-function MoneyModal({
-  kind,
-  max,
-  subscription,
-  onClose,
-  onConfirm,
-  onTaxProof,
-}: {
-  kind: "deposit" | "withdraw";
-  max?: number | undefined;
-  subscription?: Subscription | null;
-  onClose: () => void;
-  onConfirm: (amount: number, method: string, receiveNumber: string) => void;
-  onTaxProof?: (senderNumber: string, proofName: string) => void;
-}) {
-  const [raw, setRaw] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [senderNumber, setSenderNumber] = useState("");
-  const [proofName, setProofName] = useState("");
-  const [method, setMethod] = useState<string | null>(null);
-  const [receiveNumber, setReceiveNumber] = useState("");
-  const amount = Number(raw);
-  const paySettings = getPaySettings();
-
-  // الضريبة تظهر فقط للمشتركين في باقة ولم يدفعوا ضريبتها
-  const needsTax = Boolean(subscription) && !subscription?.taxPaid;
-  const tax = subscription ? (subscription.tax || PACKAGE_TAX[subscription.amount] || 0) : 0;
-
-  if (needsTax && subscription) {
-    return (
-      <div className="fixed inset-0 z-30 flex items-end justify-center bg-black/60 p-4 sm:items-center">
-        <div className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-3xl border border-border bg-card p-6 text-right">
-          <h3 className="flex items-center gap-2 text-lg font-bold">
-            <ShieldCheck aria-hidden="true" className="text-primary" />
-            دفع ضريبة الباقة
-          </h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            عشان تتم عملية سحب أرباح باقة {fmt(subscription.amount)} ج.م، لازم تدفع ضريبة الباقة
-            الأول.
-          </p>
-          <p className="mt-3 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm font-bold text-primary">
-            الضريبة المطلوبة: {fmt(tax)} ج.م
-          </p>
-
-          <div className="mt-4 rounded-xl border border-border bg-background/60 px-4 py-3">
-            <p className="text-xs text-muted-foreground">
-              1- حوّل الضريبة المطلوبة على الرقم ده لاستلام الأرباح مباشرة
-            </p>
-            <p className="mt-1 text-lg font-black tabular-nums" dir="ltr">
-              {paySettings.taxNumber}
-            </p>
-          </div>
-
-          <label className="mt-4 block text-xs text-muted-foreground">
-            2- الرقم الذي تم التحويل منه
-          </label>
-          <input
-            value={senderNumber}
-            onChange={(e) => setSenderNumber(e.target.value.replace(/[^\d+]/g, ""))}
-            inputMode="tel"
-            dir="ltr"
-            placeholder="01xxxxxxxxx"
-            className="mt-1 w-full rounded-xl border border-input bg-background/60 px-3 py-3 outline-none focus:border-primary"
-          />
-
-          <label className="mt-4 block text-xs text-muted-foreground">3- إثبات التحويل</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setProofName(e.target.files?.[0]?.name ?? "")}
-            className="mt-1 w-full rounded-xl border border-input bg-background/60 px-3 py-2 text-sm"
-          />
-          {proofName && <p className="mt-1 text-xs text-primary">{proofName}</p>}
-
-          {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
-
-          <div className="mt-5 flex gap-2">
-            <button
-              onClick={() => {
-                if (senderNumber.trim().length < 8) return setError("اكتب رقم التحويل صح.");
-                if (!proofName) return setError("أضف إثبات التحويل.");
-                setError(null);
-                onTaxProof?.(senderNumber.trim(), proofName);
-              }}
-              className="flex-1 rounded-xl bg-primary py-3 font-bold text-primary-foreground"
-            >
-              إرسال إثبات الدفع
-            </button>
-            <button onClick={onClose} className="rounded-xl border border-border px-4 py-3 text-sm">
-              إلغاء
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // الخطوة الأولى: اختيار طريقة السحب
-  if (kind === "withdraw" && !method) {
-    return (
-      <div className="fixed inset-0 z-30 flex items-end justify-center bg-black/60 p-4 sm:items-center">
-        <div className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-3xl border border-border bg-card p-6 text-right">
-          <h3 className="text-lg font-bold">طرق السحب</h3>
-          <p className="mt-1 text-sm text-muted-foreground">اختار الطريقة اللي عايز تستلم بيها.</p>
-          <div className="mt-4 space-y-2">
-            {WITHDRAW_METHODS.map((m) => (
-              <button
-                key={m}
-                onClick={() => {
-                  setMethod(m);
-                  setError(null);
-                }}
-                className="flex w-full items-center justify-between rounded-xl border border-border bg-background/60 px-4 py-3 font-bold transition hover:border-primary hover:text-primary"
-              >
-                <span className="flex items-center gap-2">
-                  <Smartphone aria-hidden="true" className="size-4" />
-                  {m}
-                </span>
-                <span className="text-muted-foreground">‹</span>
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={onClose}
-            className="mt-5 w-full rounded-xl border border-border px-4 py-3 text-sm"
-          >
-            إلغاء
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="fixed inset-0 z-30 flex items-end justify-center bg-black/60 p-4 sm:items-center">
-      <div className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-3xl border border-border bg-card p-6 text-right">
-        <h3 className="text-lg font-bold">{kind === "deposit" ? "إيداع رصيد" : `سحب عن طريق ${method}`}</h3>
-        {kind === "deposit" ? (
-          <p className="mt-1 text-sm text-muted-foreground">
-            هنتنقل لصفحة فيها أرقام {paySettings.methodName} للتحويل، هتضيف فيها إثبات التحويل وتكتب المبلغ.
-          </p>
-        ) : (
-          <>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {`المتاح للسحب: ${fmt(max ?? 0)} ج.م`}
-            </p>
-
-            <label className="mt-4 block text-xs text-muted-foreground">
-              الرقم اللي هيتم إرسال الأرباح عليه ({method})
-            </label>
-            <input
-              value={receiveNumber}
-              onChange={(e) => setReceiveNumber(e.target.value.replace(/[^\d+]/g, ""))}
-              inputMode="tel"
-              dir="ltr"
-              placeholder="01xxxxxxxxx"
-              className="mt-1 w-full rounded-xl border border-input bg-background/60 px-3 py-3 outline-none focus:border-primary"
-            />
-
-            <label className="mt-4 block text-xs text-muted-foreground">المبلغ</label>
-            <input
-              value={raw}
-              onChange={(e) => setRaw(e.target.value.replace(/[^\d.]/g, ""))}
-              inputMode="decimal"
-              dir="ltr"
-              placeholder="0.00"
-              className="mt-1 w-full rounded-xl border border-input bg-background/60 px-3 py-3 text-lg outline-none focus:border-primary"
-            />
-            <div className="mt-3 flex gap-2">
-              {[500, 1000, 5000].map((v) => (
-                <button
-                  key={v}
-                  onClick={() => setRaw(String(v))}
-                  className="flex-1 rounded-lg bg-secondary py-2 text-sm"
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-        {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
-        <div className="mt-5 flex gap-2">
-          <button
-            onClick={() => {
-              if (kind === "deposit") return onConfirm(0, "", "");
-              if (receiveNumber.trim().length < 8) return setError("اكتب رقم الاستلام صح.");
-              if (!amount || amount <= 0) return setError("اكتب مبلغاً صحيحاً.");
-              if (max !== undefined && amount > max) return setError("المبلغ أكبر من رصيدك.");
-              onConfirm(amount, method ?? "", receiveNumber.trim());
-            }}
-            className="flex-1 rounded-xl bg-primary py-3 font-bold text-primary-foreground"
-          >
-            تأكيد
-          </button>
-          <button
-            onClick={() => (kind === "withdraw" ? setMethod(null) : onClose())}
-            className="rounded-xl border border-border px-4 py-3 text-sm"
-          >
-            {kind === "withdraw" ? "رجوع" : "إلغاء"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
