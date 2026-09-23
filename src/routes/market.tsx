@@ -79,6 +79,7 @@ function MarketPage() {
   const [stocks, setStocks] = useState<Stock[]>(() => createStocks());
   const [balance, setBalance] = useState(0);
   const [reqs, setReqs] = useState<MoneyRequest[]>([]);
+  const [showReqs, setShowReqs] = useState(false);
   const [openPackages, setOpenPackages] = useState<PackageGroup | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [sub, setSub] = useState<Subscription | null>(null);
@@ -176,16 +177,55 @@ function MarketPage() {
                 <p className="text-xs text-muted-foreground">أهلاً {user.name}</p>
               </div>
             </div>
-            <button
-              onClick={() => {
-                clearStoredUser();
-                navigate({ to: "/", replace: true });
-              }}
-              className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
-            >
-              خروج
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowReqs((v) => !v)}
+                className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+              >
+                طلباتي
+              </button>
+              <button
+                onClick={() => {
+                  clearStoredUser();
+                  navigate({ to: "/", replace: true });
+                }}
+                className="rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+              >
+                تسجيل خروج
+              </button>
+            </div>
           </div>
+
+          {showReqs && (
+            <section className="rounded-2xl border border-border bg-card p-3">
+              <h2 className="text-sm font-bold">طلبات الإيداع</h2>
+              {reqs.filter((t) => t.kind === "deposit").length === 0 ? (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  لا توجد طلبات إيداع حتى الآن.
+                </p>
+              ) : (
+                <ul className="mt-2 space-y-2">
+                  {reqs
+                    .filter((t) => t.kind === "deposit")
+                    .map((t) => (
+                      <li
+                        key={t.id}
+                        className="flex items-center justify-between rounded-xl border border-border bg-background px-4 py-3 text-sm"
+                      >
+                        <span className="text-primary">إيداع {fmt(t.amount)} ج.م</span>
+                        <span className="text-xs text-muted-foreground">
+                          {t.status === "pending"
+                            ? "قيد المراجعة"
+                            : t.status === "approved"
+                              ? "تم التنفيذ"
+                              : "مرفوض"}
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </section>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -303,30 +343,6 @@ function MarketPage() {
           ))}
         </section>
 
-        {reqs.length > 0 && (
-          <>
-            <h2 className="mt-8 text-lg font-bold">طلباتي</h2>
-            <ul className="mt-3 space-y-2">
-              {reqs.map((t) => (
-                <li
-                  key={t.id}
-                  className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm"
-                >
-                  <span className={t.kind === "deposit" ? "text-primary" : "text-accent"}>
-                    {t.kind === "deposit" ? "إيداع" : "سحب"} {fmt(t.amount)} ج.م
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {t.status === "pending"
-                      ? "قيد المراجعة"
-                      : t.status === "approved"
-                        ? "تم التنفيذ"
-                        : "مرفوض"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
       </div>
     </main>
   );
