@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { clearStoredUser, getStoredUser } from "@/lib/auth";
 import { fmt } from "@/lib/market";
+import { getPaySettings, savePaySettings, type PaySettings } from "@/lib/settings";
 import {
   getAccounts,
   getRequests,
@@ -115,7 +116,9 @@ function AdminPage() {
           </p>
         )}
 
-        <h2 className="text-lg font-bold">طلبات في انتظار المراجعة ({pending.length})</h2>
+        <PaySettingsCard onSaved={() => flash("تم حفظ بيانات التحويل.")} />
+
+        <h2 className="mt-8 text-lg font-bold">طلبات في انتظار المراجعة ({pending.length})</h2>
         {pending.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">لا توجد طلبات حالياً.</p>
         ) : (
