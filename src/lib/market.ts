@@ -7,12 +7,16 @@ export type Stock = {
 };
 
 const SEED: Array<{ symbol: string; name: string; price: number }> = [
-  { symbol: "ARMX", name: "أرامكس القابضة", price: 128.4 },
-  { symbol: "NILE", name: "النيل للتطوير", price: 64.15 },
-  { symbol: "GTEK", name: "جلوب تكنولوجي", price: 312.9 },
-  { symbol: "SFIN", name: "سهم المالية", price: 45.7 },
-  { symbol: "ORYX", name: "أوريكس للطاقة", price: 89.35 },
-  { symbol: "MDNA", name: "مدينة العقارية", price: 22.6 },
+  { symbol: "AAPL", name: "آبل", price: 232.15 },
+  { symbol: "MSFT", name: "مايكروسوفت", price: 428.9 },
+  { symbol: "GOOGL", name: "جوجل (ألفابت)", price: 178.4 },
+  { symbol: "AMZN", name: "أمازون", price: 205.7 },
+  { symbol: "TSLA", name: "تسلا", price: 342.6 },
+  { symbol: "NVDA", name: "إنفيديا", price: 131.25 },
+  { symbol: "META", name: "ميتا (فيسبوك)", price: 585.2 },
+  { symbol: "ARAM", name: "أرامكو السعودية", price: 27.8 },
+  { symbol: "STC", name: "إس تي سي السعودية", price: 42.35 },
+  { symbol: "COMI", name: "البنك التجاري الدولي CIB", price: 78.9 },
 ];
 
 function series(base: number, n = 40): number[] {
