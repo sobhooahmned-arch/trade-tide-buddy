@@ -11,7 +11,7 @@ import {
   type MoneyRequest,
 } from "@/lib/store";
 
-const NUMBERS = ["01201838463", "01208895415"];
+import { getPaySettings } from "@/lib/settings";
 
 export const Route = createFileRoute("/deposit")({
   ssr: false,
@@ -70,6 +70,11 @@ function DepositPage() {
   const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<"form" | "pending" | "banned">("form");
   const [banLeft, setBanLeft] = useState(0);
+  const [settings, setSettings] = useState(getPaySettings());
+  const NUMBERS = settings.depositNumbers;
+  useEffect(() => {
+    setSettings(getPaySettings());
+  }, []);
 
   useEffect(() => {
     const u = getStoredUser();
@@ -197,7 +202,7 @@ function DepositPage() {
 
         <div className="rounded-2xl border border-border bg-card p-5 text-center">
           <p className="text-sm text-muted-foreground">
-            حوّل المبلغ على أحد أرقام أورنج كاش التالية، ثم أرفق إثبات التحويل واكتب المبلغ.
+            حوّل المبلغ على أحد أرقام {settings.methodName} التالية، ثم أرفق إثبات التحويل واكتب المبلغ.
           </p>
           <p className="mt-2 text-sm">
             رصيدك الحالي: <span className="font-bold text-primary">{fmt(balance)} ج.م</span>
@@ -248,7 +253,7 @@ function DepositPage() {
 
         {view === "form" && (
           <>
-        <h2 className="mt-6 text-lg font-bold">أرقام أورنج كاش للتحويل</h2>
+        <h2 className="mt-6 text-lg font-bold">أرقام {settings.methodName} للتحويل</h2>
         <section className="mt-3 space-y-2">
           {NUMBERS.map((num, i) => (
             <div
@@ -257,7 +262,7 @@ function DepositPage() {
             >
               <div>
                 <p className="text-xs text-muted-foreground">
-                  أورنج كاش {i === 0 ? "١" : "٢"}
+                  {settings.methodName} {i + 1}
                 </p>
                 <p className="mt-1 text-lg font-bold tabular-nums" dir="ltr">
                   {num}
