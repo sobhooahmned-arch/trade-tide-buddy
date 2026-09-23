@@ -79,6 +79,7 @@ function MarketPage() {
   const [stocks, setStocks] = useState<Stock[]>(() => createStocks());
   const [balance, setBalance] = useState(0);
   const [reqs, setReqs] = useState<MoneyRequest[]>([]);
+  const [showReqs, setShowReqs] = useState(false);
   const [openPackages, setOpenPackages] = useState<PackageGroup | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [sub, setSub] = useState<Subscription | null>(null);
