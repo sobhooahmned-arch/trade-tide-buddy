@@ -71,7 +71,7 @@ function DepositPage() {
   const [view, setView] = useState<"form" | "pending" | "banned">("form");
   const [banLeft, setBanLeft] = useState(0);
   const [settings, setSettings] = useState(getPaySettings());
-  const NUMBERS = settings.depositNumbers;
+  const METHODS = settings.depositMethods;
   useEffect(() => {
     setSettings(getPaySettings());
   }, []);
@@ -202,7 +202,7 @@ function DepositPage() {
 
         <div className="rounded-2xl border border-border bg-card p-5 text-center">
           <p className="text-sm text-muted-foreground">
-            حوّل المبلغ على أحد أرقام {settings.methodName} التالية، ثم أرفق إثبات التحويل واكتب المبلغ.
+            حوّل المبلغ على أحد الأرقام التالية، ثم أرفق إثبات التحويل واكتب المبلغ.
           </p>
           <p className="mt-2 text-sm">
             رصيدك الحالي: <span className="font-bold text-primary">{fmt(balance)} ج.م</span>
