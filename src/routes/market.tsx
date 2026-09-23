@@ -343,30 +343,6 @@ function MarketPage() {
           ))}
         </section>
 
-        {reqs.length > 0 && (
-          <>
-            <h2 className="mt-8 text-lg font-bold">طلباتي</h2>
-            <ul className="mt-3 space-y-2">
-              {reqs.map((t) => (
-                <li
-                  key={t.id}
-                  className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 text-sm"
-                >
-                  <span className={t.kind === "deposit" ? "text-primary" : "text-accent"}>
-                    {t.kind === "deposit" ? "إيداع" : "سحب"} {fmt(t.amount)} ج.م
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {t.status === "pending"
-                      ? "قيد المراجعة"
-                      : t.status === "approved"
-                        ? "تم التنفيذ"
-                        : "مرفوض"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
       </div>
     </main>
   );
