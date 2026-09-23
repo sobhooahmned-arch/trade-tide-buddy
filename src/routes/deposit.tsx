@@ -253,27 +253,25 @@ function DepositPage() {
 
         {view === "form" && (
           <>
-        <h2 className="mt-6 text-lg font-bold">أرقام {settings.methodName} للتحويل</h2>
+        <h2 className="mt-6 text-lg font-bold">أرقام التحويل</h2>
         <section className="mt-3 space-y-2">
-          {NUMBERS.map((num, i) => (
+          {METHODS.map((m) => (
             <div
-              key={num}
+              key={`${m.number}-${m.name}`}
               className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-4"
             >
               <div>
-                <p className="text-xs text-muted-foreground">
-                  {settings.methodName} {i + 1}
-                </p>
+                <p className="text-xs text-muted-foreground">{m.name}</p>
                 <p className="mt-1 text-lg font-bold tabular-nums" dir="ltr">
-                  {num}
+                  {m.number}
                 </p>
               </div>
               <button
-                onClick={() => copyNumber(num)}
-                aria-label={`نسخ الرقم ${num}`}
+                onClick={() => copyNumber(m.number)}
+                aria-label={`نسخ الرقم ${m.number}`}
                 className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground transition hover:opacity-90"
               >
-                {copied === num ? (
+                {copied === m.number ? (
                   <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M4 12l5 5L20 6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
