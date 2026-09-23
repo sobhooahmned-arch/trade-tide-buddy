@@ -71,7 +71,7 @@ function DepositPage() {
   const [view, setView] = useState<"form" | "pending" | "banned">("form");
   const [banLeft, setBanLeft] = useState(0);
   const [settings, setSettings] = useState(getPaySettings());
-  const NUMBERS = settings.depositNumbers;
+  const METHODS = settings.depositMethods;
   useEffect(() => {
     setSettings(getPaySettings());
   }, []);
@@ -202,7 +202,7 @@ function DepositPage() {
 
         <div className="rounded-2xl border border-border bg-card p-5 text-center">
           <p className="text-sm text-muted-foreground">
-            حوّل المبلغ على أحد أرقام {settings.methodName} التالية، ثم أرفق إثبات التحويل واكتب المبلغ.
+            حوّل المبلغ على أحد الأرقام التالية، ثم أرفق إثبات التحويل واكتب المبلغ.
           </p>
           <p className="mt-2 text-sm">
             رصيدك الحالي: <span className="font-bold text-primary">{fmt(balance)} ج.م</span>
@@ -253,27 +253,25 @@ function DepositPage() {
 
         {view === "form" && (
           <>
-        <h2 className="mt-6 text-lg font-bold">أرقام {settings.methodName} للتحويل</h2>
+        <h2 className="mt-6 text-lg font-bold">أرقام التحويل</h2>
         <section className="mt-3 space-y-2">
-          {NUMBERS.map((num, i) => (
+          {METHODS.map((m) => (
             <div
-              key={num}
+              key={`${m.number}-${m.name}`}
               className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-4"
             >
               <div>
-                <p className="text-xs text-muted-foreground">
-                  {settings.methodName} {i + 1}
-                </p>
+                <p className="text-xs text-muted-foreground">{m.name}</p>
                 <p className="mt-1 text-lg font-bold tabular-nums" dir="ltr">
-                  {num}
+                  {m.number}
                 </p>
               </div>
               <button
-                onClick={() => copyNumber(num)}
-                aria-label={`نسخ الرقم ${num}`}
+                onClick={() => copyNumber(m.number)}
+                aria-label={`نسخ الرقم ${m.number}`}
                 className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground transition hover:opacity-90"
               >
-                {copied === num ? (
+                {copied === m.number ? (
                   <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M4 12l5 5L20 6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
