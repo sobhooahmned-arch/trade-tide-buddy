@@ -85,7 +85,6 @@ function MarketPage() {
   const [stocks, setStocks] = useState<Stock[]>(() => createStocks());
   const [balance, setBalance] = useState(0);
   const [reqs, setReqs] = useState<MoneyRequest[]>([]);
-  const [modal, setModal] = useState<"withdraw" | null>(null);
   const [openPackages, setOpenPackages] = useState<PackageGroup | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [sub, setSub] = useState<Subscription | null>(null);
@@ -168,27 +167,6 @@ function MarketPage() {
     window.setTimeout(() => setNotice(null), 6000);
   }
 
-  function applyWithdraw(amount: number, method: string, receiveNumber: string) {
-    if (!user) return;
-    addRequest({ identifier: user.identifier, name: user.name, kind: "withdraw", amount });
-    setReqs(userRequests(user.identifier));
-    setModal(null);
-    setNotice(
-      `تم إرسال طلب سحب ${fmt(amount)} ج.م عن طريق ${method} على الرقم ${receiveNumber}، سيتم تنفيذه بعد مراجعة الإدارة.`,
-    );
-    window.setTimeout(() => setNotice(null), 6000);
-  }
-
-
-  function handleTaxProof(senderNumber: string, proofName: string) {
-    if (!user) return;
-    submitTaxProof({ identifier: user.identifier, senderNumber, proofName });
-    setSub(getSubscription(user.identifier));
-    setModal(null);
-    setNotice("تم إرسال إثبات دفع الضريبة، سيتم مراجعته وتحويل الأرباح.");
-    window.setTimeout(() => setNotice(null), 6000);
-  }
-
 
   return (
     <main className="min-h-screen pb-16">
@@ -224,7 +202,7 @@ function MarketPage() {
               إضافة رصيد ↓
             </button>
             <button
-              onClick={() => setModal("withdraw")}
+              onClick={() => navigate({ to: "/withdraw" })}
               className="rounded-2xl border border-accent/60 bg-accent/10 px-4 py-3 text-right font-bold text-accent transition hover:bg-accent/20"
             >
               <span className="block text-xs font-medium opacity-80">سحب</span>
